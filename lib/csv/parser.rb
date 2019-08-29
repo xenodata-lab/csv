@@ -202,6 +202,14 @@ class CSV
           chunk = input.gets(nil, @chunk_size)
           if chunk
             raise InvalidEncoding unless chunk.valid_encoding?
+            if @chunk_buffer
+              chunk = @chunk_buffer + chunk
+              @chunk_buffer = nil
+            end
+            if @row_separator.size == 2 and chunk.end_with?(@row_separator[0])
+              @chunk_buffer = chunk[-1]
+              chunk = chunk[0..-2]
+            end
             @scanner = StringScanner.new(chunk)
             if input.respond_to?(:eof?) and input.eof?
               @inputs.shift
